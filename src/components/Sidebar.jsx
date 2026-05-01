@@ -3,12 +3,24 @@ import { useAuth } from '../context/AuthContext'
 import { useBilling } from '../context/BillingContext'
 
 const NAV = [
+  { id: 'dashboard', label: 'Dashboard', icon: DashIcon },
   { id: 'calendar', label: 'Calendar', icon: CalIcon },
   { id: 'chores', label: 'Chores', icon: ChoreIcon },
   { id: 'meals', label: 'Meal Plan', icon: MealIcon },
   { id: 'ai', label: 'AI Assistant', icon: AIIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ]
+
+function DashIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+      <rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+      <rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+      <rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+    </svg>
+  )
+}
 
 function SettingsIcon() {
   return (
@@ -103,6 +115,9 @@ export default function Sidebar() {
               {item.label}
               {item.id === 'ai' && (
                 <span style={{ marginLeft: 'auto', fontSize: 10, background: 'var(--green)', color: '#fff', padding: '1px 6px', borderRadius: 99 }}>AI</span>
+              )}
+              {item.id === 'dashboard' && (
+                <span style={{ marginLeft: 'auto', fontSize: 10, background: '#EF9F27', color: '#fff', padding: '1px 6px', borderRadius: 99 }}>NEW</span>
               )}
             </button>
           )

@@ -9,6 +9,7 @@ import AIPage from './pages/AIPage'
 import AuthPage from './pages/AuthPage'
 import SettingsPage from './pages/SettingsPage'
 import JoinPage from './pages/JoinPage'
+import DashboardPage from './pages/DashboardPage'
 import AddMemberModal from './components/AddMemberModal'
 import UpgradeGate from './components/UpgradeGate'
 import { useApp } from './context/AppContext'
@@ -22,6 +23,7 @@ function AppShell() {
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <Sidebar />
       <main style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {page === 'dashboard' && <DashboardPage />}
         {page === 'calendar' && <CalendarPage />}
         {page === 'chores'   && <ChoresPage />}
         {page === 'meals'    && <MealsPage />}

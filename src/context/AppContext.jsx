@@ -54,6 +54,7 @@ const mapEvent = (r) => ({
   duration: r.duration_minutes,
   memberId: r.member_id ?? null,
   location: r.location ?? '', notes: r.notes ?? '',
+  countdown: r.countdown ?? false,
 })
 const mapChore = (r, completions) => ({
   id: r.id, title: r.title, memberId: r.member_id ?? null,
@@ -211,7 +212,7 @@ export function AppProvider({ children, familyId }) {
         family_id: fid.current, title: ev.title, date: ev.date,
         time: ev.time, duration_minutes: ev.duration || 60,
         member_id: ev.memberId || null, location: ev.location || null,
-        notes: ev.notes || null,
+        notes: ev.notes || null, countdown: ev.countdown || false,
       }).select().single()
 
       // Notify other family members

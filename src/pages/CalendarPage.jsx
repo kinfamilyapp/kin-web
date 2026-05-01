@@ -126,7 +126,7 @@ function EventDetail({ event, member, onClose, onDelete }) {
 function AddEventModal({ onClose, onAdd, members, defaultDate }) {
   const [form, setForm] = useState({
     title: '', date: format(defaultDate || new Date(), 'yyyy-MM-dd'),
-    time: '09:00', duration: 60, memberId: '', location: '', notes: ''
+    time: '09:00', duration: 60, memberId: '', location: '', notes: '', countdown: false
   })
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -188,6 +188,16 @@ function AddEventModal({ onClose, onAdd, members, defaultDate }) {
         <div className="form-group">
           <label>Notes</label>
           <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Any notes..." rows={2} style={{ resize: 'none' }} />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', cursor: 'pointer' }} onClick={() => set('countdown', !form.countdown)}>
+          <div style={{ width: 18, height: 18, borderRadius: 4, border: `2px solid ${form.countdown ? 'var(--green)' : 'var(--border-strong)'}`, background: form.countdown ? 'var(--green)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {form.countdown && <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500 }}>Show countdown on Dashboard</div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Displays a countdown timer on the wall display</div>
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
