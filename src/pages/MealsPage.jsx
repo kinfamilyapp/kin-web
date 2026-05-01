@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { format, addDays, startOfWeek } from 'date-fns'
+import { format, addDays, startOfWeek, addWeeks, subWeeks, isThisWeek } from 'date-fns'
 import { useApp } from '../context/AppContext'
 
 const MEAL_SLOTS = ['breakfast', 'lunch', 'dinner', 'snack']
@@ -32,11 +32,16 @@ function EditMealModal({ date, slot, value, onClose, onSave }) {
 }
 
 export default function MealsPage() {
-  const { meals, saveMeal, currentDate } = useApp()
+  const { meals, saveMeal } = useApp()
   const [editModal, setEditModal] = useState(null)
+  const [weekStart, setWeekStart] = useState(startOfWeek(new Date()))
 
-  const weekStart = startOfWeek(currentDate)
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+
+  const goBack    = () => setWeekStart(w => subWeeks(w, 1))
+  const goForward = () => setWeekStart(w => addWeeks(w, 1))
+  const goToday   = () => setWeekStart(startOfWeek(new Date()))
+  const isCurrentWeek = isThisWeek(weekStart)
 
   const getMeal = (date, slot) => meals[format(date, 'yyyy-MM-dd')]?.[slot] || ''
 
@@ -55,10 +60,20 @@ export default function MealsPage() {
 
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '1.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+      {/* Header with week navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, marginBottom: 4 }}>Meal Plan</h1>
-          <p style={{ color: 'var(--text-2)', fontSize: 14 }}>Week of {format(weekStart, 'MMMM d')}</p>
+          <p style={{ color: 'var(--text-2)', fontSize: 14 }}>
+            {format(weekStart, 'MMMM d')} — {format(addDays(weekStart, 6), 'MMMM d, yyyy')}
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button className="btn btn-ghost btn-sm" onClick={goBack} style={{ padding: '6px 12px', fontSize: 18, lineHeight: 1 }}>‹</button>
+          {!isCurrentWeek && (
+            <button className="btn btn-ghost btn-sm" onClick={goToday} style={{ fontSize: 13 }}>This week</button>
+          )}
+          <button className="btn btn-ghost btn-sm" onClick={goForward} style={{ padding: '6px 12px', fontSize: 18, lineHeight: 1 }}>›</button>
         </div>
       </div>
 
