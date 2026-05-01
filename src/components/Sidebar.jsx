@@ -7,9 +7,21 @@ const NAV = [
   { id: 'calendar', label: 'Calendar', icon: CalIcon },
   { id: 'chores', label: 'Chores', icon: ChoreIcon },
   { id: 'meals', label: 'Meal Plan', icon: MealIcon },
+  { id: 'lists', label: 'Lists', icon: ListsIcon },
   { id: 'ai', label: 'AI Assistant', icon: AIIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ]
+
+function ListsIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M6 4h8M6 8h8M6 12h8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+      <circle cx="2.5" cy="4" r="1" fill="currentColor"/>
+      <circle cx="2.5" cy="8" r="1" fill="currentColor"/>
+      <circle cx="2.5" cy="12" r="1" fill="currentColor"/>
+    </svg>
+  )
+}
 
 function DashIcon() {
   return (

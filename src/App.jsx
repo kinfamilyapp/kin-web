@@ -10,6 +10,7 @@ import AuthPage from './pages/AuthPage'
 import SettingsPage from './pages/SettingsPage'
 import JoinPage from './pages/JoinPage'
 import DashboardPage from './pages/DashboardPage'
+import ListsPage from './pages/ListsPage'
 import AddMemberModal from './components/AddMemberModal'
 import UpgradeGate from './components/UpgradeGate'
 import { useApp } from './context/AppContext'
@@ -27,6 +28,7 @@ function AppShell() {
         {page === 'calendar' && <CalendarPage />}
         {page === 'chores'   && <ChoresPage />}
         {page === 'meals'    && <MealsPage />}
+        {page === 'lists'    && <ListsPage />}
         {page === 'ai'       && (
           <UpgradeGate feature="AI Assistant">
             <AIPage />

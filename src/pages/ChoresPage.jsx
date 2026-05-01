@@ -66,6 +66,16 @@ export default function ChoresPage() {
   const { chores, members, toggleChore, addChore, getMemberById } = useApp()
   const [showModal, setShowModal] = useState(false)
   const [filter, setFilter] = useState('all')
+  const [confetti, setConfetti] = useState(false)
+
+  const handleToggle = (id) => {
+    const chore = chores.find(c => c.id === id)
+    if (chore && !chore.done) {
+      setConfetti(true)
+      setTimeout(() => setConfetti(false), 1400)
+    }
+    toggleChore(id)
+  }
 
   const filtered = chores.filter(c => {
     if (filter === 'done') return c.done
@@ -85,6 +95,29 @@ export default function ChoresPage() {
 
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '1.5rem' }}>
+      {/* Confetti burst */}
+      {confetti && (
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999 }}>
+          {['🎉','⭐','✨','🌟','💫','🎊','🏆','🥳'].map((emoji, i) => (
+            <div key={i} style={{
+              position: 'absolute',
+              left: `${10 + i * 11}%`,
+              top: '35%',
+              fontSize: i % 2 === 0 ? 32 : 24,
+              animation: `choreConfetti${i} 1.2s ease-out forwards`,
+            }}>{emoji}</div>
+          ))}
+          <style>{`
+            ${[0,1,2,3,4,5,6,7].map(i => `
+              @keyframes choreConfetti${i} {
+                0% { transform: translateY(0) rotate(0deg) scale(0.5); opacity: 1; }
+                50% { opacity: 1; transform: translateY(-80px) rotate(${(i-3)*30}deg) scale(1.2); }
+                100% { transform: translateY(-160px) rotate(${(i-3)*60}deg) scale(0.8); opacity: 0; }
+              }
+            `).join('')}
+          `}</style>
+        </div>
+      )}
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
@@ -138,7 +171,7 @@ export default function ChoresPage() {
               return (
                 <div key={chore.id} className="card" style={{ padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: 12, opacity: chore.done ? 0.65 : 1 }}>
                   {/* Checkbox */}
-                  <button onClick={() => toggleChore(chore.id)} style={{
+                  <button onClick={() => handleToggle(chore.id)} style={{
                     width: 22, height: 22, borderRadius: 6, flexShrink: 0,
                     border: `2px solid ${chore.done ? 'var(--green)' : 'var(--border-strong)'}`,
                     background: chore.done ? 'var(--green)' : 'transparent',

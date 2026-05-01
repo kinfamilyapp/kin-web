@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { format, differenceInDays, parseISO, isToday, isTomorrow, addDays } from 'date-fns'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { format, differenceInDays, parseISO, isToday, isTomorrow } from 'date-fns'
 import { useApp } from '../context/AppContext'
 
 // ── Icons ──────────────────────────────────────────────────────
@@ -13,6 +13,12 @@ function FullscreenIcon({ active }) {
       <path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
+}
+function LockIcon() {
+  return <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="6" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><path d="M4 6V4.5a3 3 0 016 0V6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+}
+function PhotoIcon() {
+  return <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><circle cx="5" cy="5.5" r="1.2" fill="currentColor"/><path d="M1 9l3-3 2.5 2.5 2-2L13 10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
 }
 
 // ── Weather fetcher ────────────────────────────────────────────
@@ -254,10 +260,88 @@ const THEMES = [
 
 export default function DashboardPage() {
   const { events, chores, meals, members, getMemberById } = useApp()
-  const [theme, setTheme]         = useState('dark')
+  const [theme, setTheme]               = useState('dark')
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const [controlsTimer, setControlsTimer] = useState(null)
+
+  // Sleep mode
+  const [sleepStart, setSleepStart] = useState('22:00')
+  const [sleepEnd,   setSleepEnd]   = useState('07:00')
+  const [sleepEnabled, setSleepEnabled] = useState(false)
+  const [isSleeping, setIsSleeping] = useState(false)
+  const [showSleepSettings, setShowSleepSettings] = useState(false)
+
+  // Parental lock
+  const [lockEnabled, setLockEnabled]   = useState(false)
+  const [lockPin, setLockPin]           = useState('1234')
+  const [isLocked, setIsLocked]         = useState(false)
+  const [pinInput, setPinInput]         = useState('')
+  const [pinError, setPinError]         = useState(false)
+  const [showLockSettings, setShowLockSettings] = useState(false)
+  const [newPin, setNewPin]             = useState('')
+
+  // Photo slideshow
+  const [photos, setPhotos]             = useState([])
+  const [slideshowActive, setSlideshowActive] = useState(false)
+  const [currentPhoto, setCurrentPhoto] = useState(0)
+  const [showPhotoSettings, setShowPhotoSettings] = useState(false)
+  const photoInterval = useRef(null)
+
+  // Sleep mode check
+  useEffect(() => {
+    if (!sleepEnabled) { setIsSleeping(false); return }
+    const check = () => {
+      const now = new Date()
+      const h = now.getHours(), m = now.getMinutes()
+      const current = h * 60 + m
+      const [sh, sm] = sleepStart.split(':').map(Number)
+      const [eh, em] = sleepEnd.split(':').map(Number)
+      const start = sh * 60 + sm
+      const end   = eh * 60 + em
+      const sleeping = start > end
+        ? current >= start || current < end
+        : current >= start && current < end
+      setIsSleeping(sleeping)
+    }
+    check()
+    const t = setInterval(check, 60000)
+    return () => clearInterval(t)
+  }, [sleepEnabled, sleepStart, sleepEnd])
+
+  // Photo slideshow cycle
+  useEffect(() => {
+    if (slideshowActive && photos.length > 1) {
+      photoInterval.current = setInterval(() => {
+        setCurrentPhoto(p => (p + 1) % photos.length)
+      }, 8000)
+    }
+    return () => clearInterval(photoInterval.current)
+  }, [slideshowActive, photos.length])
+
+  // Photo upload handler
+  const handlePhotoUpload = (e) => {
+    const files = Array.from(e.target.files)
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        setPhotos(prev => [...prev, ev.target.result])
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
+  // PIN verification
+  const verifyPin = () => {
+    if (pinInput === lockPin) {
+      setIsLocked(false)
+      setPinInput('')
+      setPinError(false)
+    } else {
+      setPinError(true)
+      setTimeout(() => { setPinError(false); setPinInput('') }, 1200)
+    }
+  }
 
   const currentTheme = THEMES.find(t => t.id === theme) || THEMES[0]
   const isDark = theme !== 'light'
@@ -316,6 +400,72 @@ export default function DashboardPage() {
         transition: 'background 0.5s ease',
       }}
     >
+      {/* SLEEP SCREEN */}
+      {isSleeping && (
+        <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+          onClick={() => { setSleepEnabled(false); setIsSleeping(false) }}>
+          <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.15)' }}>
+            <div style={{ fontSize: 64, fontWeight: 100, fontFamily: 'system-ui' }}>{format(new Date(), 'h:mm')}</div>
+            <div style={{ fontSize: 14, marginTop: 8 }}>Tap to wake</div>
+          </div>
+        </div>
+      )}
+
+      {/* LOCK SCREEN */}
+      {isLocked && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1900, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)' }}>
+          <div style={{ textAlign: 'center', color: '#fff' }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>🔒</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 24, marginBottom: 4 }}>Kin is locked</div>
+            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', marginBottom: 24 }}>Enter PIN to make changes</div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
+              {[0,1,2,3].map(i => (
+                <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: pinInput.length > i ? '#1D9E75' : 'rgba(255,255,255,0.3)', transition: 'background 0.15s' }} />
+              ))}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, maxWidth: 200, margin: '0 auto 12px' }}>
+              {[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map((n, i) => (
+                <button key={i} onClick={() => {
+                  if (n === '⌫') setPinInput(p => p.slice(0,-1))
+                  else if (n !== '') {
+                    const next = pinInput + String(n)
+                    setPinInput(next)
+                    if (next.length === 4) {
+                      setTimeout(() => {
+                        if (next === lockPin) { setIsLocked(false); setPinInput(''); setPinError(false) }
+                        else { setPinError(true); setTimeout(() => { setPinError(false); setPinInput('') }, 800) }
+                      }, 100)
+                    }
+                  }
+                }} style={{
+                  padding: '14px', borderRadius: 12, fontSize: 18, border: 'none',
+                  background: n === '' ? 'transparent' : pinError ? 'rgba(226,75,74,0.3)' : 'rgba(255,255,255,0.12)',
+                  color: '#fff', cursor: n === '' ? 'default' : 'pointer',
+                  transition: 'background 0.15s',
+                }}>
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PHOTO SLIDESHOW OVERLAY */}
+      {slideshowActive && photos.length > 0 && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 500, background: '#000' }}
+          onClick={() => setSlideshowActive(false)}>
+          <img src={photos[currentPhoto]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 }} />
+          <div style={{ position: 'absolute', bottom: 20, right: 20, color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
+            Tap anywhere to exit slideshow
+          </div>
+          <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
+            {photos.map((_, i) => (
+              <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: i === currentPhoto ? '#fff' : 'rgba(255,255,255,0.3)' }} />
+            ))}
+          </div>
+        </div>
+      )}
       {/* Controls bar */}
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
@@ -332,14 +482,103 @@ export default function DashboardPage() {
           <button key={t.id} onClick={() => setTheme(t.id)} style={{
             padding: '4px 10px', borderRadius: 99, fontSize: 11, border: 'none', cursor: 'pointer',
             background: theme === t.id ? (isDark ? 'rgba(255,255,255,0.25)' : '#1D9E75') : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'),
-            color: theme === t.id ? (isDark ? '#fff' : '#fff') : (isDark ? 'rgba(255,255,255,0.7)' : '#6B6B6B'),
+            color: theme === t.id ? '#fff' : (isDark ? 'rgba(255,255,255,0.7)' : '#6B6B6B'),
             fontWeight: theme === t.id ? 600 : 400,
           }}>
             {t.label}
           </button>
         ))}
+
+        {/* Sleep mode button */}
+        <button onClick={() => setShowSleepSettings(s => !s)} title="Sleep schedule" style={{
+          padding: '5px 10px', borderRadius: 8, border: 'none', cursor: 'pointer', marginLeft: 4,
+          background: sleepEnabled ? 'rgba(29,158,117,0.3)' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'),
+          color: isDark ? '#fff' : '#1A1A1A', fontSize: 13,
+        }}>😴 {sleepEnabled ? `${sleepStart}` : 'Sleep'}</button>
+
+        {/* Sleep settings dropdown */}
+        {showSleepSettings && (
+          <div style={{ position: 'absolute', top: 48, right: 160, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, zIndex: 200, minWidth: 220, boxShadow: 'var(--shadow-md)' }}>
+            <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 12 }}>Sleep schedule</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <label style={{ fontSize: 12, color: 'var(--text-2)', minWidth: 40 }}>Sleep</label>
+              <input type="time" value={sleepStart} onChange={e => setSleepStart(e.target.value)} style={{ fontSize: 13, padding: '4px 8px', flex: 1 }} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <label style={{ fontSize: 12, color: 'var(--text-2)', minWidth: 40 }}>Wake</label>
+              <input type="time" value={sleepEnd} onChange={e => setSleepEnd(e.target.value)} style={{ fontSize: 13, padding: '4px 8px', flex: 1 }} />
+            </div>
+            <button onClick={() => { setSleepEnabled(s => !s); setShowSleepSettings(false) }} className="btn btn-primary btn-sm" style={{ width: '100%' }}>
+              {sleepEnabled ? 'Disable sleep mode' : 'Enable sleep mode'}
+            </button>
+          </div>
+        )}
+
+        {/* Photos button */}
+        <button onClick={() => setShowPhotoSettings(s => !s)} title="Photo slideshow" style={{
+          padding: '5px 8px', borderRadius: 8, border: 'none', cursor: 'pointer',
+          background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+          color: isDark ? '#fff' : '#1A1A1A', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13,
+        }}><PhotoIcon /> Photos</button>
+
+        {/* Photo settings dropdown */}
+        {showPhotoSettings && (
+          <div style={{ position: 'absolute', top: 48, right: 80, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, zIndex: 200, minWidth: 240, boxShadow: 'var(--shadow-md)' }}>
+            <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 10 }}>Photo slideshow</div>
+            <label style={{ display: 'block', cursor: 'pointer', padding: '8px 12px', borderRadius: 8, background: 'var(--surface-2)', fontSize: 13, textAlign: 'center', marginBottom: 8 }}>
+              📷 Upload photos
+              <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} />
+            </label>
+            {photos.length > 0 && (
+              <>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 8 }}>{photos.length} photo{photos.length !== 1 ? 's' : ''} uploaded</div>
+                <button onClick={() => { setSlideshowActive(true); setShowPhotoSettings(false) }} className="btn btn-primary btn-sm" style={{ width: '100%', marginBottom: 6 }}>
+                  ▶ Start slideshow
+                </button>
+                <button onClick={() => setPhotos([])} className="btn btn-ghost btn-sm" style={{ width: '100%', fontSize: 12 }}>
+                  Remove all photos
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Lock button */}
+        <button onClick={() => setShowLockSettings(s => !s)} title="Parental lock" style={{
+          padding: '5px 8px', borderRadius: 8, border: 'none', cursor: 'pointer',
+          background: lockEnabled ? 'rgba(239,159,39,0.25)' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'),
+          color: isDark ? '#fff' : '#1A1A1A', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13,
+        }}><LockIcon /> {lockEnabled ? 'Lock ON' : 'Lock'}</button>
+
+        {/* Lock settings dropdown */}
+        {showLockSettings && (
+          <div style={{ position: 'absolute', top: 48, right: 40, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, zIndex: 200, minWidth: 220, boxShadow: 'var(--shadow-md)' }}>
+            <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 10 }}>Parental lock</div>
+            <div className="form-group">
+              <label>PIN (4 digits)</label>
+              <input type="number" value={newPin || lockPin} onChange={e => setNewPin(e.target.value.slice(0,4))}
+                placeholder="1234" style={{ letterSpacing: 8, fontSize: 18, textAlign: 'center' }} />
+            </div>
+            <button onClick={() => {
+              if (newPin) setLockPin(newPin)
+              setLockEnabled(true)
+              setIsLocked(true)
+              setShowLockSettings(false)
+              setNewPin('')
+            }} className="btn btn-primary btn-sm" style={{ width: '100%', marginBottom: 6 }}>
+              🔒 Lock now
+            </button>
+            {lockEnabled && (
+              <button onClick={() => { setLockEnabled(false); setIsLocked(false); setShowLockSettings(false) }}
+                className="btn btn-ghost btn-sm" style={{ width: '100%', fontSize: 12 }}>
+                Disable lock
+              </button>
+            )}
+          </div>
+        )}
+
         <button onClick={toggleFullscreen} style={{
-          padding: '5px 8px', borderRadius: 8, border: 'none', cursor: 'pointer', marginLeft: 8,
+          padding: '5px 8px', borderRadius: 8, border: 'none', cursor: 'pointer', marginLeft: 4,
           background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
           color: isDark ? '#fff' : '#1A1A1A',
         }}>
