@@ -342,6 +342,17 @@ export function AppProvider({ children, familyId }) {
     setMembers(prev => prev.filter(m => m.id !== id))
   }, [])
 
+  const updateMember = useCallback(async (id, updates) => {
+    const dbUpdates = {}
+    if (updates.color) dbUpdates.color    = updates.color
+    if (updates.bg)    dbUpdates.color_bg = updates.bg
+    if (updates.name)  dbUpdates.name     = updates.name
+    if (isSupabaseEnabled && fid.current) {
+      await supabase.from('members').update(dbUpdates).eq('id', id)
+    }
+    setMembers(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m))
+  }, [])
+
   const saveMeal = useCallback(async (dateStr, slot, value) => {
     if (isSupabaseEnabled && fid.current) {
       await supabase.from('meals').upsert({
@@ -366,7 +377,7 @@ export function AppProvider({ children, familyId }) {
       getEventsForDate, getMemberById,
       addEvent, deleteEvent, updateEvent,
       toggleChore, addChore,
-      addMember, deleteMember, saveMeal, setMeals,
+      addMember, deleteMember, updateMember, saveMeal, setMeals,
       dbReady, isSupabaseEnabled,
       MEMBER_COLORS, MEMBER_BG,
     }}>

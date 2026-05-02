@@ -84,7 +84,7 @@ function PlusIcon() {
 }
 
 export default function Sidebar() {
-  const { page, setPage, members, openModal, isSupabaseEnabled, dbReady, deleteMember } = useApp()
+  const { page, setPage, members, openModal, isSupabaseEnabled, dbReady, deleteMember, updateMember } = useApp()
   const auth = useAuth()
   const billing = useBilling()
 
@@ -143,7 +143,18 @@ export default function Sidebar() {
           <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', fontSize: 13, color: 'var(--text-2)', borderRadius: 'var(--radius-sm)' }}
             onMouseEnter={e => e.currentTarget.querySelector('.del-btn') && (e.currentTarget.querySelector('.del-btn').style.opacity = '1')}
             onMouseLeave={e => e.currentTarget.querySelector('.del-btn') && (e.currentTarget.querySelector('.del-btn').style.opacity = '0')}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+            <div
+                title="Click to change color"
+                onClick={() => {
+                  const colors = ['#1D9E75','#378ADD','#EF9F27','#D85A30','#9B59B6','#E91E63','#E67E22','#2ECC71']
+                  const bgs    = ['#E1F5EE','#E6F1FB','#FAEEDA','#FAECE7','#F5EEF8','#FCE4EC','#FEF0E6','#E8F8F0']
+                  const next = (colors.indexOf(m.color) + 1) % colors.length
+                  updateMember(m.id, { color: colors[next], bg: bgs[next] })
+                }}
+                style={{ width: 12, height: 12, borderRadius: '50%', background: m.color, flexShrink: 0, cursor: 'pointer', border: '1px solid rgba(0,0,0,0.1)', transition: 'transform 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.4)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              />
             <span style={{ flex: 1 }}>{m.name}</span>
             <button className="del-btn" onClick={() => { if (window.confirm('Remove ' + m.name + '?')) deleteMember(m.id) }}
               style={{ opacity: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', fontSize: 16, lineHeight: 1, padding: '0 2px', transition: 'opacity 0.15s' }}>×</button>
