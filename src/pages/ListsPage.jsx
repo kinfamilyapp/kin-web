@@ -196,12 +196,12 @@ export default function ListsPage() {
         background: 'var(--surface)',
         borderRight: '1px solid var(--border)',
         display: 'flex', flexDirection: 'column',
-        overflow: 'hidden',
+        overflow: 'visible',
       }}>
         <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18 }}>Lists</div>
-          <button className="btn btn-primary btn-sm" onClick={() => setShowNewListModal(true)} style={{ borderRadius: 99, padding: '5px 10px' }}>
-            <PlusIcon />
+          <button className="btn btn-primary btn-sm" onClick={() => setShowNewListModal(true)} style={{ borderRadius: 99, padding: '5px 14px', fontSize: 13 }}>
+            + New
           </button>
         </div>
 
@@ -370,7 +370,7 @@ export default function ListsPage() {
 
       {/* New List Modal */}
       {showNewListModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9000, padding: 24 }}
           onClick={() => setShowNewListModal(false)}>
           <div className="card" style={{ width: '100%', maxWidth: 400, padding: '1.5rem' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
