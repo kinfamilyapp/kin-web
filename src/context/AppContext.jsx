@@ -322,8 +322,12 @@ export function AppProvider({ children, familyId }) {
         return
       }
       const { data } = await supabase.from('members').insert({
-        family_id: currentFamilyId, ...newMember,
-        color_bg: newMember.bg, sort_order: members.length,
+        family_id: currentFamilyId,
+        name: newMember.name,
+        initials: newMember.initials,
+        color: newMember.color,
+        color_bg: newMember.bg,
+        sort_order: members.length,
       }).select().single()
       if (data) setMembers(prev => [...prev, mapMember(data)])
     } else {
