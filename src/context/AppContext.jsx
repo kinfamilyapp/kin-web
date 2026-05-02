@@ -306,12 +306,25 @@ export function AppProvider({ children, familyId }) {
       color: MEMBER_COLORS[idx],
       bg: MEMBER_BG[idx],
     }
-    if (isSupabaseEnabled && fid.current) {
+    if (isSupabaseEnabled) {
+      // Get family_id fresh from the session if ref is missing
+      let currentFamilyId = fid.current
+      if (!currentFamilyId) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: prof } = await supabase.from('profiles').select('family_id').eq('id', user.id).single()
+          currentFamilyId = prof?.family_id
+          fid.current = currentFamilyId
+        }
+      }
+      if (!currentFamilyId) {
+        setMembers(prev => [...prev, { ...newMember, id: 'm' + Date.now() }])
+        return
+      }
       const { data } = await supabase.from('members').insert({
-        family_id: fid.current, ...newMember,
+        family_id: currentFamilyId, ...newMember,
         color_bg: newMember.bg, sort_order: members.length,
       }).select().single()
-      // Update local state immediately — don't wait for real-time
       if (data) setMembers(prev => [...prev, mapMember(data)])
     } else {
       setMembers(prev => [...prev, { ...newMember, id: 'm' + Date.now() }])
