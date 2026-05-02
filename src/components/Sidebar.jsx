@@ -84,7 +84,7 @@ function PlusIcon() {
 }
 
 export default function Sidebar() {
-  const { page, setPage, members, openModal, isSupabaseEnabled, dbReady } = useApp()
+  const { page, setPage, members, openModal, isSupabaseEnabled, dbReady, deleteMember } = useApp()
   const auth = useAuth()
   const billing = useBilling()
 
@@ -140,9 +140,13 @@ export default function Sidebar() {
           Family
         </div>
         {members.map(m => (
-          <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', fontSize: 13, color: 'var(--text-2)', borderRadius: 'var(--radius-sm)' }}>
+          <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', fontSize: 13, color: 'var(--text-2)', borderRadius: 'var(--radius-sm)' }}
+            onMouseEnter={e => e.currentTarget.querySelector('.del-btn') && (e.currentTarget.querySelector('.del-btn').style.opacity = '1')}
+            onMouseLeave={e => e.currentTarget.querySelector('.del-btn') && (e.currentTarget.querySelector('.del-btn').style.opacity = '0')}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
-            {m.name}
+            <span style={{ flex: 1 }}>{m.name}</span>
+            <button className="del-btn" onClick={() => { if (window.confirm('Remove ' + m.name + '?')) deleteMember(m.id) }}
+              style={{ opacity: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', fontSize: 16, lineHeight: 1, padding: '0 2px', transition: 'opacity 0.15s' }}>×</button>
           </div>
         ))}
         <button onClick={() => openModal('addMember')} style={{

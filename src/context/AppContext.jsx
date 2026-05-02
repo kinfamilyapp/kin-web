@@ -335,6 +335,13 @@ export function AppProvider({ children, familyId }) {
     }
   }, [members.length])
 
+  const deleteMember = useCallback(async (id) => {
+    if (isSupabaseEnabled && fid.current) {
+      await supabase.from('members').delete().eq('id', id)
+    }
+    setMembers(prev => prev.filter(m => m.id !== id))
+  }, [])
+
   const saveMeal = useCallback(async (dateStr, slot, value) => {
     if (isSupabaseEnabled && fid.current) {
       await supabase.from('meals').upsert({
@@ -359,7 +366,7 @@ export function AppProvider({ children, familyId }) {
       getEventsForDate, getMemberById,
       addEvent, deleteEvent, updateEvent,
       toggleChore, addChore,
-      addMember, saveMeal, setMeals,
+      addMember, deleteMember, saveMeal, setMeals,
       dbReady, isSupabaseEnabled,
       MEMBER_COLORS, MEMBER_BG,
     }}>
