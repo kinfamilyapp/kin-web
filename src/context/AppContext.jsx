@@ -307,10 +307,12 @@ export function AppProvider({ children, familyId }) {
       bg: MEMBER_BG[idx],
     }
     if (isSupabaseEnabled && fid.current) {
-      await supabase.from('members').insert({
+      const { data } = await supabase.from('members').insert({
         family_id: fid.current, ...newMember,
         color_bg: newMember.bg, sort_order: members.length,
-      })
+      }).select().single()
+      // Update local state immediately — don't wait for real-time
+      if (data) setMembers(prev => [...prev, mapMember(data)])
     } else {
       setMembers(prev => [...prev, { ...newMember, id: 'm' + Date.now() }])
     }
