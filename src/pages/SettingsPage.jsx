@@ -181,7 +181,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: '1.5rem', maxWidth: 640, width: '100%' }}>
+    <div style={{ flex: 1, overflow: 'auto', padding: '1.5rem', maxWidth: 640, width: '100%', boxSizing: 'border-box', width: '100%' }}>
       <div style={{ marginBottom: '1.5rem' }}>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, marginBottom: 4 }}>Settings</h1>
         <p style={{ color: 'var(--text-2)', fontSize: 14 }}>{user?.email}</p>
