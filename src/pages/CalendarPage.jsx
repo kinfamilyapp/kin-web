@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, addMonths, subMonths, isSameMonth, isSameDay, addWeeks, subWeeks, addDays, subDays, isToday } from 'date-fns'
 import { useApp } from '../context/AppContext'
 import { useIsMobile } from '../hooks/useIsMobile'
@@ -215,6 +215,12 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const isMobile = useIsMobile()
+
+  useEffect(() => {
+    const handler = () => setShowAddModal(true)
+    window.addEventListener('kin-add-event', handler)
+    return () => window.removeEventListener('kin-add-event', handler)
+  }, [])
 
   // Month view grid
   const monthStart = startOfMonth(currentDate)
