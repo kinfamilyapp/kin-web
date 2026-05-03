@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 function PlusIcon() {
   return <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
@@ -67,6 +68,7 @@ export default function ChoresPage() {
   const [showModal, setShowModal] = useState(false)
   const [filter, setFilter] = useState('all')
   const [confetti, setConfetti] = useState(false)
+  const isMobile = useIsMobile()
 
   const handleToggle = (id) => {
     const chore = chores.find(c => c.id === id)
@@ -147,7 +149,7 @@ export default function ChoresPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '1.5rem', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 280px', gap: '1.5rem', alignItems: 'start' }}>
         {/* Chore list */}
         <div>
           {/* Filter tabs */}

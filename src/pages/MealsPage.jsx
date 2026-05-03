@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { format, addDays, startOfWeek, addWeeks, subWeeks, isThisWeek } from 'date-fns'
 import { useApp } from '../context/AppContext'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const MEAL_SLOTS = ['breakfast', 'lunch', 'dinner', 'snack']
 const MEAL_EMOJI = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snack: '🍎' }
@@ -34,9 +35,10 @@ function EditMealModal({ date, slot, value, onClose, onSave }) {
 export default function MealsPage() {
   const { meals, saveMeal } = useApp()
   const [editModal, setEditModal] = useState(null)
+  const isMobile = useIsMobile()
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date()))
 
-  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+  const days = Array.from({ length: isMobile ? 3 : 7 }, (_, i) => addDays(weekStart, i))
 
   const goBack    = () => setWeekStart(w => subWeeks(w, 1))
   const goForward = () => setWeekStart(w => addWeeks(w, 1))
@@ -79,7 +81,7 @@ export default function MealsPage() {
 
       {/* Weekly grid */}
       <div style={{ overflow: 'auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '80px repeat(7, 1fr)', gap: 8, minWidth: 700 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '60px repeat(3, 1fr)' : '80px repeat(7, 1fr)', gap: 8, minWidth: isMobile ? 'unset' : 700 }}>
           {/* Header row */}
           <div />
           {days.map(day => (

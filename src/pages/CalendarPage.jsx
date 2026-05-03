@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, addMonths, subMonths, isSameMonth, isSameDay, addWeeks, subWeeks, addDays, subDays, isToday } from 'date-fns'
 import { useApp } from '../context/AppContext'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 function ChevronLeft() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -213,6 +214,7 @@ export default function CalendarPage() {
   const { currentDate, setCurrentDate, selectedDate, setSelectedDate, view, setView, members, getEventsForDate, getMemberById, addEvent, deleteEvent, openModal } = useApp()
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const isMobile = useIsMobile()
 
   // Month view grid
   const monthStart = startOfMonth(currentDate)
@@ -373,8 +375,7 @@ export default function CalendarPage() {
         )}
       </div>
 
-      {/* Right panel - selected day events */}
-      <div style={{ width: 280, borderLeft: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {!isMobile && <div style={{ width: 280, borderLeft: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)' }}>
           <div style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 2 }}>{format(selectedDate, 'EEEE')}</div>
           <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22 }}>{format(selectedDate, 'MMMM d')}</div>
@@ -414,7 +415,7 @@ export default function CalendarPage() {
             <PlusIcon /> Add event
           </button>
         </div>
-      </div>
+      </div>}
 
       {/* Modals */}
       {selectedEvent && (
