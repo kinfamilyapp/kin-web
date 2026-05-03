@@ -3,17 +3,17 @@ import { useApp } from '../context/AppContext'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 const LIST_TYPES = [
-  { id: 'grocery', label: 'Grocery',  emoji: '\U0001f6d2', color: '#1D9E75', bg: '#E1F5EE' },
-  { id: 'todo',    label: 'To-Do',    emoji: '\u2705', color: '#378ADD', bg: '#E6F1FB' },
-  { id: 'packing', label: 'Packing',  emoji: '\U0001f9f3', color: '#EF9F27', bg: '#FAEEDA' },
-  { id: 'custom',  label: 'Custom',   emoji: '\U0001f4dd', color: '#9B59B6', bg: '#F5EEF8' },
+  { id: 'grocery', label: 'Grocery',  emoji: '🛒', color: '#1D9E75', bg: '#E1F5EE' },
+  { id: 'todo',    label: 'To-Do',    emoji: '✅', color: '#378ADD', bg: '#E6F1FB' },
+  { id: 'packing', label: 'Packing',  emoji: '🧳', color: '#EF9F27', bg: '#FAEEDA' },
+  { id: 'custom',  label: 'Custom',   emoji: '📝', color: '#9B59B6', bg: '#F5EEF8' },
 ]
 
 function Confetti({ show }) {
   if (!show) return null
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999 }}>
-      {['\U0001f389','\u2b50','\u2728','\U0001f31f','\U0001f4ab','\U0001f38a'].map((e, i) => (
+      {['🎉','⭐','✨','🌟','💫','🎊'].map((e, i) => (
         <span key={i} style={{ position: 'absolute', left: `${15 + i * 13}%`, top: '40%', fontSize: 28, animation: `pop${i} 1.1s ease-out forwards` }}>{e}</span>
       ))}
       <style>{[0,1,2,3,4,5].map(i => `@keyframes pop${i} { 0% { opacity:1; transform: translateY(0); } 100% { opacity:0; transform: translateY(-140px) rotate(${(i-2)*45}deg); } }`).join('')}</style>
