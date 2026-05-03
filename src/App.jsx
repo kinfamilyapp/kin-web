@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { AppProvider } from './context/AppContext'
 import { BillingProvider, useBilling } from './context/BillingContext'
 import Sidebar from './components/Sidebar'
+import MobileNav from './components/MobileNav'
 import CalendarPage from './pages/CalendarPage'
 import ChoresPage from './pages/ChoresPage'
 import MealsPage from './pages/MealsPage'
@@ -16,35 +18,58 @@ import UpgradeGate from './components/UpgradeGate'
 import { useApp } from './context/AppContext'
 import './index.css'
 
-function AppShell() {
-  const { page, modal } = useApp()
-  const billing = useBilling()
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+  return isMobile
+}
 
+function PageContent() {
+  const { page } = useApp()
+  const billing = useBilling()
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar />
-      <main style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {page === 'dashboard' && <DashboardPage />}
-        {page === 'calendar' && <CalendarPage />}
-        {page === 'chores'   && <ChoresPage />}
-        {page === 'meals'    && <MealsPage />}
-        {page === 'lists'    && <ListsPage />}
-        {page === 'ai'       && (
-          <UpgradeGate feature="AI Assistant">
-            <AIPage />
-          </UpgradeGate>
-        )}
-        {page === 'settings' && <SettingsPage />}
-      </main>
+    <>
+      {page === 'dashboard' && <DashboardPage />}
+      {page === 'calendar'  && <CalendarPage />}
+      {page === 'chores'    && <ChoresPage />}
+      {page === 'meals'     && <MealsPage />}
+      {page === 'lists'     && <ListsPage />}
+      {page === 'ai'        && (
+        <UpgradeGate feature="AI Assistant">
+          <AIPage />
+        </UpgradeGate>
+      )}
+      {page === 'settings'  && <SettingsPage />}
+    </>
+  )
+}
+
+function AppShell() {
+  const { modal } = useApp()
+  const isMobile = useIsMobile()
+  return (
+    <>
+      {isMobile ? (
+        <MobileNav><PageContent /></MobileNav>
+      ) : (
+        <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+          <Sidebar />
+          <main style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <PageContent />
+          </main>
+        </div>
+      )}
       {modal?.type === 'addMember' && <AddMemberModal />}
-    </div>
+    </>
   )
 }
 
 function AppWithAuth() {
   const { user, profile, loading, isSupabaseEnabled } = useAuth()
-
-  // Check for invite token in URL
   const params = new URLSearchParams(window.location.search)
   const inviteToken = window.location.pathname === '/join' ? params.get('token') : null
 
@@ -58,7 +83,6 @@ function AppWithAuth() {
     )
   }
 
-  // Demo mode — no Supabase
   if (!isSupabaseEnabled) {
     return (
       <AppProvider familyId={null}>
@@ -69,7 +93,6 @@ function AppWithAuth() {
     )
   }
 
-  // Handle invite acceptance flow
   if (inviteToken) {
     return (
       <AppProvider familyId={profile?.family_id ?? null}>
@@ -80,7 +103,6 @@ function AppWithAuth() {
     )
   }
 
-  // Not logged in
   if (!user) return <AuthPage />
 
   const familyId = profile?.family_id ?? null
