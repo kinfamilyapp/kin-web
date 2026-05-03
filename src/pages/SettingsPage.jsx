@@ -169,8 +169,10 @@ function InviteSection({ sendInvite, isPro }) {
 
 export default function SettingsPage() {
   const { members, addMember } = useApp()
-  const { user, profile, signOut } = useAuth()
-  const { subscription, isPro, isTrial, startCheckout, sendInvite, loading } = useBilling()
+  const authCtx = useAuth()
+  const { user, profile, signOut } = authCtx || {}
+  const billingCtx = useBilling()
+  const { subscription, isPro, isTrial, startCheckout, sendInvite, loading } = billingCtx || {}
   const [upgrading, setUpgrading] = useState(false)
   const familyId = profile?.family_id
 
