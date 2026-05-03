@@ -43,7 +43,7 @@ export default function MobileNav({ children }) {
 
       <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>{children}</main>
 
-      <div style={{ display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', flexShrink: 0, zIndex: 50 }}>
+      <div style={{ display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', flexShrink: 0, zIndex: 50, position: 'sticky', bottom: 0 }}>
         {TABS.map(tab => {
           const active = page === tab.id
           return (

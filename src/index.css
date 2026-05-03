@@ -61,3 +61,9 @@ label { font-size: 13px; font-weight: 500; color: var(--text-2); display: block;
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+
+/* ── Fix mobile viewport height so bottom tab always shows ── */
+@media (max-width: 767px) {
+  main { max-height: calc(100vh - 120px) !important; overflow: auto; }
+  .mobile-page { height: 100% !important; max-height: 100% !important; }
+}
