@@ -265,7 +265,7 @@ export default function CalendarPage() {
                 </button>
               ))}
             </div>
-            <button className="btn btn-primary btn-sm" onClick={() => setShowAddModal(true)}>
+            <button className="btn btn-primary btn-sm" data-add-event="true" onClick={() => setShowAddModal(true)}>
               <PlusIcon /> Add event
             </button>
           </div>
